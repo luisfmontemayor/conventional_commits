@@ -14,7 +14,7 @@ if str(script_dir) not in sys.path:
     sys.path.insert(0, str(script_dir))
 
 from common import cli
-from constants import COMMIT_TYPES
+from constants import COMMIT_TYPES, NO_SCOPE_STR
 from scopes import get_staged_scopes
 
 SYSTEM_DEPENDENCIES = ["gum"]
@@ -65,7 +65,7 @@ def main():
         and sys.argv[1] not in COMMIT_TYPES
     ):
         preselected_message = " ".join(sys.argv[1:])
-    commit_prefix = f"{commit_type}({scope}):"
+    commit_prefix = f"{commit_type}({scope}): " if scope != NO_SCOPE_STR else f"{commit_type}: "
     if preselected_message:
         conventional_commit_message = f"{commit_prefix} {preselected_message}"
     else:
