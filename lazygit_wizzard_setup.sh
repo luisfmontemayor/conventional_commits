@@ -23,7 +23,6 @@ printf "${CYAN}[CONVENTIONAL_COMMITS] Setting up wizard in $GIT_ROOT...$RESET\n"
 cp "${SCRIPT_DIR}/get_staged_scopes.py" "${GIT_CONFIG_DIR}/"
 cp "${SCRIPT_DIR}/scopes.py" "${GIT_CONFIG_DIR}/"
 cp "${SCRIPT_DIR}/constants.py" "${GIT_CONFIG_DIR}/"
-cp "${SCRIPT_DIR}/scopes.yaml" "${GIT_CONFIG_DIR}/"
 
 # Copy the main template to .git/lazygit.yml
 cp "${SCRIPT_DIR}/lazygit_template.yml" "${GIT_CONFIG_DIR}/lazygit.yml"
