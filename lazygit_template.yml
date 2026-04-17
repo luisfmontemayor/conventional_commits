@@ -1,0 +1,41 @@
+customCommands:
+  - key: "W"
+    context: "global"
+    description: "Conventional Commit Wizard"
+    # index 0: Type, index 1: Scope, index 2: Message
+    # We use a helper shell command to format the prefix correctly (no parentheses if scope is "None")
+    command: >
+      type="{{index .PromptResponses 0}}";
+      scope="{{index .PromptResponses 1}}";
+      msg="{{index .PromptResponses 2}}";
+      if [ "$scope" = "None" ] || [ -z "$scope" ]; then
+        commit_msg="$type: $msg";
+      else
+        commit_msg="$type($scope): $msg";
+      fi;
+      git commit -m "$commit_msg"
+    prompts:
+      - type: "menu"
+        title: "Select Commit Type"
+        options:
+          - value: "feat"
+            description: "A new feature"
+          - value: "fix"
+            description: "A bug fix"
+          - value: "refactor"
+            description: "A code change that neither fixes a bug nor adds a feature"
+          - value: "chore"
+            description: "Other: either a refactor, a fix or a feat"
+          - value: "test"
+            description: "Adding tests or correcting existing ones"
+
+      - type: "menuFromCommand"
+        title: "Select Scope"
+        command: "python3 {{.RootDir}}/.git/get_staged_scopes.py"
+        filter: '(?P<value>.*)'
+        valueFormat: '{{ .value }}'
+        labelFormat: '{{ .value }}'
+
+      - type: "input"
+        title: "Commit Message"
+        initialValue: ""
