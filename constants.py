@@ -1,16 +1,7 @@
 # Written by Luis Felipe Montemayor, sometime around December of 2025
 
 COMMIT_TYPES: list[str] = ["feat", "fix", "refactor", "test", "chore"]
-SCOPE_CATEGORIES: set[str] = {
-    "backend",
-    "glia_python",
-    "core",
-    "gliar",
-    "infrastructural",
-    "scripts",
-    "libs",
-    "test",
-}
+
 INFRA_FILES: set[str] = {
     "pyproject.toml",
     "uv.lock",
@@ -18,11 +9,31 @@ INFRA_FILES: set[str] = {
     ".gitattributes",
     ".gitignore",
     "lazygit.yml",
+    "LICENSE",
+    "README.md",
 }
-MISE_FILES: set[str] = {
-    "mise.toml",
-    "mise.lock",
-}
+
 INFRA_DIRS: set[str] = {".git", ".vscode", ".config/mise/conf.d/"}
+
+# Directories to skip in the scope path (e.g., generic containers)
+BLACKLIST: set[str] = {
+    "src",
+    "lib",
+    "include",
+    "bin",
+    "node_modules",
+    "venv",
+    ".venv",
+}
+
+# Directories to always treat as significant scope roots
+WHITELIST: set[str] = {
+    "common",
+    "docs",
+    "infra",
+    "scripts",
+    "tests",
+}
+
 NO_SCOPE_STR = "None"
 NOTHING_STAGED_STR = "Nothing Staged"

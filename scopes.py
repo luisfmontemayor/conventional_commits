@@ -1,137 +1,135 @@
 #!/usr/bin/env python3
 # Written by Luis Felipe Montemayor, sometime around December of 2025
-# https://open.spotify.com/track/4ewSenduOmU9Vo40jPnK4T?si=ece2bb53df9f4aa6
-
-import sys
+import os
 from pathlib import Path
-from typing import Literal
+from typing import Set, List
 
-from common import cli, system
-
-from .constants import (
+from constants import (
     INFRA_DIRS,
     INFRA_FILES,
-    MISE_FILES,
     NO_SCOPE_STR,
     NOTHING_STAGED_STR,
-    SCOPE_CATEGORIES,
+    BLACKLIST,
+    WHITELIST,
 )
 
+def run_command(command: List[str]) -> str | None:
+    import subprocess
+    try:
+        result = subprocess.run(command, text=True, capture_output=True, check=False)
+        return result.stdout.strip() if result.returncode == 0 else None
+    except FileNotFoundError:
+        return None
 
-def changed_files_exist():
-    unstaged = system.run_command(
-        ["git", "ls-files", "--others", "--exclude-standard", "--modified"]
-    )
-    return True if unstaged else False
+def get_staged_files() -> List[str]:
+    output = run_command(["git", "diff", "--cached", "--name-only"])
+    return output.split("\n") if output else []
 
+def is_infra_file(path: Path) -> bool:
+    return path.name in INFRA_FILES or any(d in path.parts for d in INFRA_DIRS)
 
-def confirm_stage_all():
-    if not changed_files_exist():
-        print("No changed files exist.")
-        return False
-    else:
-        return cli.gum_confirm("Stage all files?")
-
-
-def list_staged_files() -> list[str]:
-    output: str | None = system.run_command(["git", "diff", "--cached", "--name-only"])
-    if not output:
-        return []
-    return output.split("\n")
-
-
-def stage_all_files():
-    system.run_command(["git", "add", "--all"], capture=False)
-
-
-def get_staged_files() -> list[str]:
-    return list_staged_files()
-
-
-def is_infra_file(
-    filename: str, filepath: Path, INFRA_FILES: set[str] = INFRA_FILES
-) -> bool:
-    return filename in INFRA_FILES or any(
-        dir for dir in INFRA_DIRS if dir in filepath.parts
-    )
-
-
-def add_scope_category(filepath: str) -> str:
+def get_scope_for_file(filepath: str) -> str:
     path = Path(filepath)
-    parts = path.parts
-
-    category: str | Literal[""] = parts[0] if parts else ""
-    filename = path.name
-
-    if parts[:3] == ("backend", "migrations", "versions"):
-        return "backend/migrations/versions"
-
-    if filename == "README.md":
+    
+    # Rule: README.md at root
+    if path.name == "README.md" and len(path.parts) == 1:
         return "README"
+    
+    # Rule: Docs
+    if "docs" in path.parts:
+        # If it's in docs/, return docs/<filename>
+        docs_index = path.parts.index("docs")
+        if len(path.parts) > docs_index + 1:
+            return f"docs/{path.stem}"
+        return "docs"
 
-    if filename in MISE_FILES:
-        return filename
+    # Rule: Infrastructural
+    if is_infra_file(path):
+        return f"infra/{path.name}"
 
-    if parts[:-1] == (".config", "mise", "conf.d"):
-        return f"mise/{filename.rstrip('.toml')}"
+    # Tree-aware heuristic
+    parts = list(path.parts)
+    if not parts:
+        return NO_SCOPE_STR
+    
+    # We want to build a scope path
+    significant_parts = []
+    current_path = Path(".")
+    
+    # Root is usually significant
+    if parts:
+        significant_parts.append(parts[0])
+        current_path = current_path / parts[0]
 
-    if is_infra_file(filename, filepath=path):
-        return f"infrastructural/{filename}"
+    # Walk through the path parts (excluding the filename itself)
+    for i in range(1, len(parts) - 1):
+        part = parts[i]
+        current_path = current_path / part
+        
+        if part in BLACKLIST:
+            continue
+            
+        if part in WHITELIST:
+            significant_parts.append(part)
+            continue
+            
+        # Branching point heuristic: >= 2 children in filesystem
+        try:
+            if current_path.exists() and current_path.is_dir():
+                children = list(current_path.iterdir())
+                if len(children) >= 2:
+                    significant_parts.append(part)
+        except PermissionError:
+            pass
 
-    if category in SCOPE_CATEGORIES:
-        if category in ["scripts", "test"]:
-            if len(parts) > 2:
-                return f"{category}/{parts[1]}"
-            if len(parts) > 1:
-                return f"{category}/{path.stem}"
-            return category
+    # Rule: Leaf parent (immediate parent of the file)
+    if len(parts) > 1:
+        leaf_parent = parts[-2]
+        if leaf_parent not in significant_parts and leaf_parent not in BLACKLIST:
+            significant_parts.append(leaf_parent)
 
-        clean_parts = list(parts)
-        for i in range(len(parts) - 2):
-            if parts[i + 1] == "src" and parts[i + 2] == parts[i]:
-                clean_parts = parts[: i + 1] + parts[i + 3 :]
-                break
+    if not significant_parts:
+        return NO_SCOPE_STR
+        
+    return "/".join(significant_parts)
 
-        if len(clean_parts) > 1:
-            return Path(*clean_parts).with_suffix("").as_posix()
-
-        return category
-
-    return NO_SCOPE_STR
-
-def get_staged_scopes():
+def get_staged_scopes() -> List[str]:
     staged_files = get_staged_files()
     if not staged_files:
         return [NOTHING_STAGED_STR]
 
-    unique_staged_scopes: set[str] = {add_scope_category(f) for f in staged_files}
-    extended_scopes: set[str] = set(unique_staged_scopes)
-    extended_scopes.add(NO_SCOPE_STR)
-    for scope in unique_staged_scopes:
-        if scope == NO_SCOPE_STR or "infrastructural" in scope:
+    unique_scopes: Set[str] = {get_scope_for_file(f) for f in staged_files if f.strip()}
+    
+    # Explode parents for menu hierarchy
+    extended_scopes: Set[str] = set(unique_scopes)
+    roots = set()
+    for scope in list(unique_scopes):
+        if scope == NO_SCOPE_STR or scope == NOTHING_STAGED_STR:
             continue
+        
+        # Collect top-level roots for the combined option
+        root = scope.split("/")[0]
+        roots.add(root)
 
-        parts: list[str] = scope.split("/")
-        # Add all intermediate parent paths
-        # e.g., if scope is "a/b/c", adds "a" and "a/b"
+        if scope == "README":
+            continue
+            
+        parts = scope.split("/")
         for i in range(1, len(parts)):
-            parent_scope = "/".join(parts[:i])
-            extended_scopes.add(parent_scope)
+            extended_scopes.add("/".join(parts[:i]))
 
+    # If multiple roots are touched, add a combined option (e.g., "frontend,backend")
+    if len(roots) > 1:
+        combined_roots = ",".join(sorted(list(roots)))
+        extended_scopes.add(combined_roots)
+
+    extended_scopes.add(NO_SCOPE_STR)
+    
     def scope_sort_key(s):
-        # Primary Key: Boolean flag.
-        # False (0) -> Normal scopes (First)
-        # True  (1) -> NO_SCOPE_STR (Last)
-        is_none: bool = s == NO_SCOPE_STR
-
-        parts: list[str] = s.split("/")
-        root: str = parts[0]
-
-        # Tuple comparison order:
-        # 1. is_none (0 vs 1)
-        # 2. root (Group alphabetically)
-        # 3. length (Shortest first within group)
-        # 4. string (Tie-breaker)
-        return (is_none, root, len(s), s)
+        is_none = (s == NO_SCOPE_STR)
+        # Combined roots (containing commas) should probably come after individual roots but before None
+        has_comma = "," in s
+        parts = s.split("/")
+        return (is_none, has_comma, parts[0], len(s), s)
 
     return sorted(list(extended_scopes), key=scope_sort_key)
