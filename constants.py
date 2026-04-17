@@ -35,5 +35,13 @@ WHITELIST: set[str] = {
     "tests",
 }
 
+INFRA_PREFIX: str = "infra"
+
+# Map glob patterns to scope strings. Support {stem} replacement.
+# Examples: 
+#   "web/app/*.ts": "frontend/{stem}"
+#   "api/v1/users.py": "api/users"
+MAPPINGS: dict[str, str] = {}
+
 NO_SCOPE_STR = "None"
 NOTHING_STAGED_STR = "Nothing Staged"
