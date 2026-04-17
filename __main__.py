@@ -6,11 +6,16 @@ import shutil
 import signal
 import subprocess
 import sys
+from pathlib import Path
+
+# Add the current directory to sys.path to allow absolute imports when run as a script
+script_dir = Path(__file__).resolve().parent
+if str(script_dir) not in sys.path:
+    sys.path.insert(0, str(script_dir))
 
 from common import cli
-
-from .constants import COMMIT_TYPES
-from .scopes import get_staged_scopes
+from constants import COMMIT_TYPES
+from scopes import get_staged_scopes
 
 SYSTEM_DEPENDENCIES = ["gum"]
 
