@@ -1,6 +1,6 @@
 # Written by Luis Felipe Montemayor, sometime around December of 2025
 
-COMMIT_TYPES: list[str] = ["feat", "fix", "refactor", "test", "chore"]
+COMMIT_TYPES: list[str] = ["feat", "fix", "refactor", "test", "chore", "docs"]
 
 INFRA_FILES: set[str] = {
     "pyproject.toml",
