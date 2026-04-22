@@ -96,7 +96,7 @@ def get_scope_for_file(filepath: str) -> str:
 def get_staged_scopes() -> List[str]:
     staged_files = get_staged_files()
     if not staged_files:
-        return [NOTHING_STAGED_STR]
+        return [f"({NOTHING_STAGED_STR})"]
 
     unique_scopes: Set[str] = {get_scope_for_file(f) for f in staged_files if f.strip()}
     
@@ -132,4 +132,5 @@ def get_staged_scopes() -> List[str]:
         parts = s.split("/")
         return (is_none, has_comma, parts[0], len(s), s)
 
-    return sorted(list(extended_scopes), key=scope_sort_key)
+    sorted_scopes = sorted(list(extended_scopes), key=scope_sort_key)
+    return [f"({s})" if s != NO_SCOPE_STR else "" for s in sorted_scopes]
