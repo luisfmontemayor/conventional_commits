@@ -27,7 +27,7 @@ To integrate the wizard into Lazygit:
 
 1. Run the setup script:
    ```bash
-   bash lazygit_wizzard_setup.sh
+   bash lazygit_wizard_setup.sh
    ```
 2. This will copy the necessary logic to your `.git/` folder and create a `.git/lazygit.yml` configuration.
 3. In Lazygit, you can now press `W` to start the wizard.
@@ -36,13 +36,33 @@ To integrate the wizard into Lazygit:
 
 ### Standalone CLI
 
-Run the wizard directly using Python:
+The wizard operates in **non-interactive mode** by default. It automatically selects the most likely scope based on staged files. You must provide the commit type and message as positional arguments:
+
 ```bash
-python3 .
+python3 __main__.py feat "add new login logic"
 ```
-If you provide arguments, the wizard will attempt to use them:
+
+To run the wizard in **interactive mode** (which prompts you to select the type, scope, and message using `gum`), use the `-i` flag:
+
 ```bash
-python3 . feat "add new login logic"
+python3 __main__.py -i
+```
+
+You can also view the help menu:
+
+```bash
+python3 __main__.py -h
+
+# usage: __main__.py [-h] [-i] ...
+# 
+# Conventional Commits Wizard
+# 
+# positional arguments:
+#   args               [type] [message...]
+# 
+# options:
+#   -h, --help         show this help message and exit
+#   -i, --interactive  Interactive mode
 ```
 
 ### Lazygit

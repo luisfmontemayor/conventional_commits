@@ -30,7 +30,7 @@ def changed_files_exist():
 def parse_env_file(env_path: str | Path = ".env") -> dict[str, str]:
     path = Path(env_path)
     if not path.exists():
-        print(f"Error: {path} not found.")
+        logger.error(f"{path} not found.")
         sys.exit(1)
 
     config = {}
@@ -41,5 +41,7 @@ def parse_env_file(env_path: str | Path = ".env") -> dict[str, str]:
                 continue
             if "=" in line:
                 key, value = line.split("=", 1)
+                config[key.strip()] = value.strip()
+    return config
                 config[key.strip()] = value.strip()
     return config
