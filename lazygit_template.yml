@@ -1,7 +1,7 @@
 customCommands:
   - key: "W"
     context: "global"
-    description: "Conventional Commit Wizzard"
+    description: "Conventional Commit Wizard"
     command: 'git commit -m {{index .PromptResponses 2 | quote}}'
     prompts:
       - type: "menu"
@@ -17,6 +17,8 @@ customCommands:
             description: "Other: either a refactor, a fix or a feat"
           - value: "test"
             description: "Adding tests or correcting existing ones"
+          - value: "docs"
+            description: "Documenting the product"
 
       - type: "menuFromCommand"
         title: "Select Scope"
@@ -27,4 +29,4 @@ customCommands:
 
       - type: "input"
         title: "Commit Message"
-        initialValue: "{{index .PromptResponses 0}}({{index .PromptResponses 1}}): "
+        initialValue: "{{index .PromptResponses 0}}{{index .PromptResponses 1}}: "
