@@ -7,7 +7,10 @@ CYAN="\e[36m"
 RESET="\e[0m"
 
 SCRIPT_DIR=$(dirname $(readlink -f "${BASH_SOURCE[0]}"))
-GIT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
+GIT_ROOT="$(git rev-parse --show-superproject-working-tree 2>/dev/null)"
+if [ -z "$GIT_ROOT" ]; then
+    GIT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
+fi
 GIT_CONFIG_DIR="${GIT_ROOT}/.git"
 
 if [ -z "$GIT_ROOT" ]; then
