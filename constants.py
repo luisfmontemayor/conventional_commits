@@ -35,6 +35,15 @@ WHITELIST: set[str] = {
     "tests",
 }
 
+EXACT_FILE_MATCHES: dict[str, str] = {
+    "README.md": "README",
+    "glia-todo.md": "todo",
+}
+
+PATH_PREFIX_MATCHES: list[tuple[tuple[str, ...], str]] = [
+    (("docs",), "docs/{stem}"),
+]
+
 INFRA_PREFIX: str = "infra"
 
 # Map glob patterns to scope strings. Support {stem} replacement.

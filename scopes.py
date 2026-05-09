@@ -5,10 +5,12 @@ from pathlib import Path
 from typing import Set, List
 
 from constants import (
+    EXACT_FILE_MATCHES,
     INFRA_DIRS,
     INFRA_FILES,
     NO_SCOPE_STR,
     NOTHING_STAGED_STR,
+    PATH_PREFIX_MATCHES,
     BLACKLIST,
     WHITELIST,
 )
@@ -31,17 +33,12 @@ def is_infra_file(path: Path) -> bool:
 def get_scope_for_file(filepath: str) -> str:
     path = Path(filepath)
     
-    # Rule: README.md at root
-    if path.name == "README.md" and len(path.parts) == 1:
-        return "README"
-    
-    # Rule: Docs
-    if "docs" in path.parts:
-        # If it's in docs/, return docs/<filename>
-        docs_index = path.parts.index("docs")
-        if len(path.parts) > docs_index + 1:
-            return f"docs/{path.stem}"
-        return "docs"
+    if path.name in EXACT_FILE_MATCHES:
+        return EXACT_FILE_MATCHES[path.name]
+
+    for prefix, template in PATH_PREFIX_MATCHES:
+        if path.parts[: len(prefix)] == prefix:
+            return template.format(stem=path.stem)
 
     # Rule: Infrastructural
     if is_infra_file(path):
