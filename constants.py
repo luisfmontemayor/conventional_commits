@@ -32,7 +32,7 @@ WHITELIST: set[str] = {
     "docs",
     "infra",
     "scripts",
-    "tests",
+    "test",
 }
 
 EXACT_FILE_MATCHES: dict[str, str] = {
