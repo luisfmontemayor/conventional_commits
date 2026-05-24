@@ -1,0 +1,6 @@
+- [x] @pro-executor Assess the codebase and design get_scope.py for programmatic usage
+- [x] @flash-executor Implement test/test_get_scope.py and get_scope.py
+- [x] @flash-executor Add programmatic usage documentation to README.md
+- [x] @monitor Verify the functionality of the new script and verify tests pass
+- [ ] add custom common folder method: either through project manager or by variable
+- [ ] lazygit wizard: if ccs is added as a submodule, ensure that the lazygit wizard doesn't use the ccs repo as the settings one
