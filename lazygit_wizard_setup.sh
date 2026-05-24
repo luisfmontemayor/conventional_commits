@@ -11,7 +11,7 @@ GIT_ROOT="$(git rev-parse --show-superproject-working-tree 2>/dev/null)"
 if [ -z "$GIT_ROOT" ]; then
     GIT_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)"
 fi
-GIT_CONFIG_DIR="${GIT_ROOT}/.git"
+GIT_CONFIG_DIR="$(git -C "$GIT_ROOT" rev-parse --absolute-git-dir)"
 
 if [ -z "$GIT_ROOT" ]; then
     printf "${RED}Error: Not a git repository.$RESET\n"

@@ -22,7 +22,7 @@ customCommands:
 
       - type: "menuFromCommand"
         title: "Select Scope"
-        command: "python3 .git/get_staged_scopes.py"
+        command: 'python3 "$(git rev-parse --git-dir)/get_staged_scopes.py"'
         filter: '(?P<value>.*)'
         valueFormat: '{{ .value }}'
         labelFormat: '{{ .value }}'
