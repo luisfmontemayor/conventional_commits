@@ -36,22 +36,28 @@ To integrate the wizard into Lazygit:
 
 ### Standalone CLI
 
+For convenience, it is highly recommended to set up an alias named `ccs` (Conventional Commits) in your shell profile (e.g., `~/.bashrc` or `~/.zshrc`) pointing to the main script:
+
+```bash
+alias ccs="python3 /path/to/conventional_commits/__main__.py"
+```
+
 The wizard operates in **non-interactive mode** by default. It automatically selects the most likely scope based on staged files. You must provide the commit type and message as positional arguments:
 
 ```bash
-python3 __main__.py feat "add new login logic"
+ccs feat "add new login logic"
 ```
 
 To run the wizard in **interactive mode** (which prompts you to select the type, scope, and message using `gum`), use the `-i` flag:
 
 ```bash
-python3 __main__.py -i
+ccs -i
 ```
 
 You can also view the help menu:
 
 ```bash
-python3 __main__.py -h
+ccs -h
 
 # usage: __main__.py [-h] [-i] ...
 # 
@@ -71,6 +77,34 @@ Press `W` from any context in Lazygit. You will be prompted to:
 1. Select a commit type (feat, fix, etc.).
 2. Select a scope (dynamically generated based on staged files).
 3. Enter a commit message.
+
+### Programmatic Usage
+
+For non-interactive, programmatic retrieval of the changes scope (e.g., from an automated script or script runner), use `get_scope.py`. It analyzes staged files and identifies the most specific common ancestor in the changes.
+
+To get the primary scope as plain text:
+```bash
+python3 get_scope.py
+# Example output: frontend/auth
+```
+
+To get structured JSON output representing the primary scope and all sorted alternatives:
+```bash
+python3 get_scope.py --json
+# Example output: {"primary": "frontend/auth", "alternatives": ["frontend/auth", "frontend", "None"]}
+```
+
+To validate a commit type and output the fully formatted commit prefix:
+```bash
+python3 get_scope.py --commit-type feat
+# Example output: feat(frontend/auth): 
+```
+
+Combined with `--json` to get the calculated prefix in a JSON structure:
+```bash
+python3 get_scope.py --commit-type feat --json
+# Example output: {"primary": "frontend/auth", "alternatives": ["frontend/auth", "frontend", "None"], "prefix": "feat(frontend/auth): "}
+```
 
 ## Commit Format
 
