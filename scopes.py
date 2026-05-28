@@ -58,8 +58,11 @@ def get_scope_for_file(filepath: str) -> str:
         significant_parts.append(parts[0])
         current_path = current_path / parts[0]
 
-    # Walk through the path parts (excluding the filename itself)
-    for i in range(1, len(parts) - 1):
+    is_directory = path.is_dir()
+    end_index = len(parts) if is_directory else len(parts) - 1
+
+    # Walk through the path parts
+    for i in range(1, end_index):
         part = parts[i]
         current_path = current_path / part
         
@@ -79,9 +82,9 @@ def get_scope_for_file(filepath: str) -> str:
         except PermissionError:
             pass
 
-    # Rule: Leaf parent (immediate parent of the file)
+    # Rule: Leaf parent (immediate parent of the file, or the directory itself)
     if len(parts) > 1:
-        leaf_parent = parts[-2]
+        leaf_parent = parts[-1] if is_directory else parts[-2]
         if leaf_parent not in significant_parts and leaf_parent not in BLACKLIST:
             significant_parts.append(leaf_parent)
 
