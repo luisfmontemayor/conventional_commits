@@ -80,29 +80,29 @@ Press `W` from any context in Lazygit. You will be prompted to:
 
 ### Programmatic Usage
 
-For non-interactive, programmatic retrieval of the changes scope (e.g., from an automated script or script runner), use `get_scope.py`. It analyzes staged files and identifies the most specific common ancestor in the changes.
+For non-interactive, programmatic retrieval of the changes scope (e.g., from an automated script or script runner), use `get_commit_prefix.py`. It analyzes staged files and identifies the most specific common ancestor in the changes.
 
 To get the primary scope as plain text:
 ```bash
-python3 get_scope.py
+python3 get_commit_prefix.py
 # Example output: frontend/auth
 ```
 
 To get structured JSON output representing the primary scope and all sorted alternatives:
 ```bash
-python3 get_scope.py --json
+python3 get_commit_prefix.py --json
 # Example output: {"primary": "frontend/auth", "alternatives": ["frontend/auth", "frontend", "None"]}
 ```
 
 To validate a commit type and output the fully formatted commit prefix:
 ```bash
-python3 get_scope.py --commit-type feat
+python3 get_commit_prefix.py --commit-type feat
 # Example output: feat(frontend/auth): 
 ```
 
 Combined with `--json` to get the calculated prefix in a JSON structure:
 ```bash
-python3 get_scope.py --commit-type feat --json
+python3 get_commit_prefix.py --commit-type feat --json
 # Example output: {"primary": "frontend/auth", "alternatives": ["frontend/auth", "frontend", "None"], "prefix": "feat(frontend/auth): "}
 ```
 

@@ -4,12 +4,12 @@ import io
 import sys
 from pathlib import Path
 
-# Add parent directory to path so we can import get_scope and scopes
+# Add parent directory to path so we can import get_commit_prefix and scopes
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-# We'll import get_scope inside test methods or after mocking if needed,
+# We'll import get_commit_prefix inside test methods or after mocking if needed,
 # but let's assume we can import it.
-import get_scope
+import get_commit_prefix
 
 class TestGetScope(unittest.TestCase):
 
@@ -20,7 +20,7 @@ class TestGetScope(unittest.TestCase):
         
         stdout = io.StringIO()
         with patch('sys.stdout', stdout):
-            get_scope.main([])
+            get_commit_prefix.main([])
             
         self.assertEqual(stdout.getvalue().strip(), "backend/api")
 
@@ -31,7 +31,7 @@ class TestGetScope(unittest.TestCase):
         
         stdout = io.StringIO()
         with patch('sys.stdout', stdout):
-            get_scope.main([])
+            get_commit_prefix.main([])
             
         self.assertEqual(stdout.getvalue().strip(), "None")
 
@@ -41,7 +41,7 @@ class TestGetScope(unittest.TestCase):
         
         stdout = io.StringIO()
         with patch('sys.stdout', stdout):
-            get_scope.main(["--json"])
+            get_commit_prefix.main(["--json"])
             
         import json
         data = json.loads(stdout.getvalue().strip())
@@ -54,7 +54,7 @@ class TestGetScope(unittest.TestCase):
         
         stdout = io.StringIO()
         with patch('sys.stdout', stdout):
-            get_scope.main(["--commit-type", "feat"])
+            get_commit_prefix.main(["--commit-type", "feat"])
             
         self.assertEqual(stdout.getvalue(), "feat(backend/api): \n")
 
@@ -64,7 +64,7 @@ class TestGetScope(unittest.TestCase):
         
         stdout = io.StringIO()
         with patch('sys.stdout', stdout):
-            get_scope.main(["--commit-type", "feat"])
+            get_commit_prefix.main(["--commit-type", "feat"])
             
         self.assertEqual(stdout.getvalue(), "feat: \n")
 
@@ -74,7 +74,7 @@ class TestGetScope(unittest.TestCase):
         
         stdout = io.StringIO()
         with patch('sys.stdout', stdout):
-            get_scope.main(["--commit-type", "fix", "--json"])
+            get_commit_prefix.main(["--commit-type", "fix", "--json"])
             
         import json
         data = json.loads(stdout.getvalue().strip())
@@ -85,7 +85,7 @@ class TestGetScope(unittest.TestCase):
     def test_invalid_commit_type(self):
         stderr = io.StringIO()
         with patch('sys.stderr', stderr), self.assertRaises(SystemExit) as cm:
-            get_scope.main(["--commit-type", "invalid-type"])
+            get_commit_prefix.main(["--commit-type", "invalid-type"])
             
         self.assertNotEqual(cm.exception.code, 0)
         self.assertIn("invalid-type", stderr.getvalue())
